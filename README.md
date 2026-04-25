@@ -1,6 +1,6 @@
 # Inventory SaaS Backend
 
-Production-ready Node.js backend for a multi-tenant Inventory Management System using Express.js, TypeScript, Prisma, PostgreSQL, JWT authentication, Zod validation, Pino logging, and Swagger/OpenAPI.
+Production-ready Node.js backend for a multi-tenant Inventory Management System using Express.js, TypeScript, Prisma, MySQL, JWT authentication, Zod validation, Pino logging, and Swagger/OpenAPI.
 
 ## Structure
 
@@ -96,7 +96,7 @@ Authorization: Bearer <access_token>
 ## Notes
 
 - All tenant-owned tables include `business_id`.
-- Product, category, customer, and supplier reads exclude soft-deleted records.
+- The Prisma schema and SQL migration target MySQL with `INT AUTO_INCREMENT` primary keys.
 - Sales decrement stock and purchases increment stock inside database transactions.
 - Inventory transactions provide an audit trail for manual stock movement, sales, and purchases.
 - Admin-only deletes are enforced with role middleware.

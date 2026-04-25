@@ -5,8 +5,8 @@ import { env } from "../../config/env";
 import { UnauthorizedError } from "../errors/httpErrors";
 
 export type AuthUser = {
-  id: string;
-  businessId: string;
+  id: number;
+  businessId: number;
   role: UserRole;
 };
 

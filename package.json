@@ -1,7 +1,7 @@
 {
   "name": "inventory-saas-backend",
   "version": "1.0.0",
-  "description": "Production-ready SaaS inventory management backend built with Express, TypeScript, Prisma, and PostgreSQL.",
+  "description": "Production-ready SaaS inventory management backend built with Express, TypeScript, Prisma, and MySQL.",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
@@ -56,6 +56,6 @@
     "typescript": "^5.6.3"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=20.0.0"
   }
 }

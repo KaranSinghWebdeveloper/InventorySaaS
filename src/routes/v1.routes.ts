@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { authRoutes } from "../modules/auth/auth.routes";
-import { categoryRoutes } from "../modules/categories/category.routes";
-import { inventoryRoutes } from "../modules/inventory/inventory.routes";
-import { productRoutes } from "../modules/products/product.routes";
-import { customerRoutes } from "../modules/customers/customer.routes";
-import { purchaseRoutes } from "../modules/purchases/purchase.routes";
-import { saleRoutes } from "../modules/sales/sale.routes";
-import { supplierRoutes } from "../modules/suppliers/supplier.routes";
-import { userRoutes } from "../modules/users/user.routes";
+import { authRoutes } from "./modules/auth.routes";
+import { categoryRoutes } from "./modules/category.routes";
+import { inventoryRoutes } from "./modules/inventory.routes";
+import { productRoutes } from "./modules/product.routes";
+import { customerRoutes } from "./modules/customer.routes";
+import { purchaseRoutes } from "./modules/purchase.routes";
+import { saleRoutes } from "./modules/sale.routes";
+import { supplierRoutes } from "./modules/supplier.routes";
+import { userRoutes } from "./modules/user.routes";
 
 export const v1Routes = Router();
 

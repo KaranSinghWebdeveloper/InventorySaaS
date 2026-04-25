@@ -13,5 +13,5 @@ export const logger = pino({
           }
         }
       : undefined,
-  redact: ["req.headers.authorization", "password", "passwordHash", "refreshToken"]
+  redact: ["req.headers.authorization", "password", "refreshToken"]
 });
