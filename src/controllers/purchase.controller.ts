@@ -20,4 +20,40 @@ export class PurchaseController {
       return next(error);
     }
   };
+
+  getById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return sendSuccess(
+        res,
+        "Purchase fetched",
+        await this.purchaseService.getById(req.user!.businessId, Number(req.params.id))
+      );
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  update = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return sendSuccess(
+        res,
+        "Purchase updated",
+        await this.purchaseService.update(req.user!.businessId, Number(req.params.id), req.body)
+      );
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  updateStatus = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return sendSuccess(
+        res,
+        "Purchase status updated",
+        await this.purchaseService.updateStatus(req.user!.businessId, Number(req.params.id), req.body)
+      );
+    } catch (error) {
+      return next(error);
+    }
+  };
 }

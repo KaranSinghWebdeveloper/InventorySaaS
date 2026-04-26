@@ -593,10 +593,19 @@ Response:
         "id": 1,
         "businessId": 1,
         "supplierId": 1,
+        "purchaseNumber": "PO-1001",
         "invoiceNumber": "PUR-1001",
+        "supplierReference": "SUP-REF-PO-1001",
         "totalAmount": 28950,
-        "status": "COMPLETED",
+        "notes": "Initial stock purchase",
+        "terms": "Net 15",
+        "status": "RECEIVED",
         "purchaseDate": "2026-04-20T00:00:00.000Z",
+        "expectedDeliveryDate": "2026-04-24T00:00:00.000Z",
+        "sentAt": null,
+        "confirmedAt": null,
+        "receivedAt": "2026-04-24T00:00:00.000Z",
+        "verifiedAt": null,
         "supplier": {
           "id": 1,
           "name": "Tech Wholesale Hub"
@@ -632,8 +641,14 @@ Request:
 ```json
 {
   "supplierId": 1,
+  "purchaseNumber": "PO-1002",
   "invoiceNumber": "PUR-1002",
+  "supplierReference": "SUP-APR-25",
   "purchaseDate": "2026-04-25",
+  "expectedDeliveryDate": "2026-04-30",
+  "notes": "Urgent replenishment order",
+  "terms": "Net 30",
+  "status": "SAVE_DRAFT",
   "items": [
     {
       "productId": 1,
@@ -646,5 +661,71 @@ Request:
       "price": 1820
     }
   ]
+}
+```
+
+Available purchase statuses:
+
+```text
+SAVE_DRAFT
+SENT
+PENDING_CONFIRM
+RECEIVED
+VERIFIED
+```
+
+### `GET /purchases/:id`
+
+### `PATCH /purchases/:id`
+
+Use this to edit purchase-order details before the order is received or verified.
+
+Request:
+
+```json
+{
+  "purchaseNumber": "PO-1002",
+  "invoiceNumber": "PUR-1002",
+  "supplierReference": "SUP-APR-25-REV1",
+  "purchaseDate": "2026-04-25",
+  "expectedDeliveryDate": "2026-05-02",
+  "notes": "Supplier requested updated delivery date",
+  "terms": "Net 30",
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 12,
+      "price": 560
+    },
+    {
+      "productId": 2,
+      "quantity": 4,
+      "price": 1820
+    }
+  ]
+}
+```
+
+### `PATCH /purchases/:id/status`
+
+Use this for workflow progression. Inventory is updated when status moves into `RECEIVED` for the first time.
+
+Request:
+
+```json
+{
+  "status": "SENT",
+  "supplierReference": "MAIL-PO-1002",
+  "notes": "Purchase order emailed to supplier"
+}
+```
+
+Example receive request:
+
+```json
+{
+  "status": "RECEIVED",
+  "invoiceNumber": "INV-SUP-8821",
+  "notes": "All ordered items received in good condition"
 }
 ```

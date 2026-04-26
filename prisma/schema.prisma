@@ -13,8 +13,11 @@ enum UserRole {
 }
 
 enum PurchaseStatus {
-  PENDING   @map("pending")
-  COMPLETED @map("completed")
+  SAVE_DRAFT      @map("save_draft")
+  SENT            @map("sent")
+  PENDING_CONFIRM @map("pending_confirm")
+  RECEIVED        @map("received")
+  VERIFIED        @map("verified")
 }
 
 enum SaleStatus {
@@ -170,10 +173,19 @@ model Purchase {
   id            Int            @id @default(autoincrement())
   businessId    Int            @map("business_id")
   supplierId    Int?           @map("supplier_id")
+  purchaseNumber String        @map("purchase_number") @db.VarChar(100)
   invoiceNumber String?        @map("invoice_number") @db.VarChar(100)
+  supplierReference String?    @map("supplier_reference") @db.VarChar(100)
   totalAmount   Decimal?       @map("total_amount") @db.Decimal(12, 2)
-  status        PurchaseStatus @default(COMPLETED)
+  notes         String?        @db.Text
+  terms         String?        @db.Text
+  status        PurchaseStatus @default(SAVE_DRAFT)
   purchaseDate  DateTime?      @map("purchase_date") @db.Date
+  expectedDeliveryDate DateTime? @map("expected_delivery_date") @db.Date
+  sentAt        DateTime?      @map("sent_at")
+  confirmedAt   DateTime?      @map("confirmed_at")
+  receivedAt    DateTime?      @map("received_at")
+  verifiedAt    DateTime?      @map("verified_at")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
 
@@ -183,6 +195,7 @@ model Purchase {
 
   @@index([businessId])
   @@index([supplierId])
+  @@unique([businessId, purchaseNumber])
   @@map("purchases")
 }
 

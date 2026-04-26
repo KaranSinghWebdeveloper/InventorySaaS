@@ -171,10 +171,16 @@ async function main() {
     data: {
       businessId: business.id,
       supplierId: supplierA.id,
+      purchaseNumber: "PO-1001",
       invoiceNumber: "PUR-1001",
+      supplierReference: "SUP-REF-PO-1001",
       totalAmount: 28950.0,
-      status: PurchaseStatus.COMPLETED,
+      notes: "Initial stock purchase",
+      terms: "Net 15",
+      status: PurchaseStatus.RECEIVED,
       purchaseDate: new Date("2026-04-20"),
+      expectedDeliveryDate: new Date("2026-04-24"),
+      receivedAt: new Date("2026-04-24"),
       items: {
         create: [
           {
