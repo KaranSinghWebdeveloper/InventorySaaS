@@ -3,7 +3,7 @@ import { sendSuccess } from "../common/response/apiResponse";
 import { PurchaseService } from "../services/purchase.service";
 
 export class PurchaseController {
-  constructor(private readonly purchaseService = new PurchaseService()) {}
+  constructor(private readonly purchaseService = new PurchaseService()) { }
 
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -52,6 +52,33 @@ export class PurchaseController {
         "Purchase status updated",
         await this.purchaseService.updateStatus(req.user!.businessId, Number(req.params.id), req.body)
       );
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  downloadPdf = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const purchaseId = Number(req.params.id);
+      const businessId = req.user!.businessId;
+
+      const purchase = await this.purchaseService.getById(businessId, purchaseId);
+
+      if (!purchase) {
+        return res.status(404).json({ message: "Purchase not found" });
+      }
+
+      const pdfBuffer = await this.purchaseService.generatePurchasePdf(purchase);
+
+      // 🔥 Important headers for download
+      res.writeHead(200, {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename=purchase_order_${purchaseId}.pdf`,
+        "Content-Length": pdfBuffer.length,
+      });
+
+      return res.end(pdfBuffer);
+
     } catch (error) {
       return next(error);
     }

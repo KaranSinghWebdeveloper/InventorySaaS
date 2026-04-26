@@ -26,5 +26,10 @@ router.patch(
   validateRequest(updatePurchaseStatusSchema),
   controller.updateStatus
 );
+router.post(
+  "/:id/download-pdf",
+  validateRequest(idParamSchema),
+  controller.downloadPdf
+);
 
 export const purchaseRoutes = router;

@@ -14,7 +14,7 @@ import {
 } from "../requests/purchase.request";
 
 export class PurchaseRepository {
-  constructor(private readonly db: PrismaClient = prisma) {}
+  constructor(private readonly db: PrismaClient = prisma) { }
 
   create(
     businessId: number,
@@ -77,19 +77,29 @@ export class PurchaseRepository {
     supplierId?: number;
     search?: string;
   }) {
+    // Sanitize status - remove empty strings, null, or undefined completely
+    let sanitizedStatus: PurchaseStatus | undefined = undefined;
+
+    if (args.status) {
+      const statusStr = String(args.status).trim();
+      if (statusStr && statusStr.length > 0) {
+        sanitizedStatus = args.status;
+      }
+    }
+
     const where: Prisma.PurchaseWhereInput = {
       businessId: args.businessId,
-      ...(args.status ? { status: args.status } : {}),
+      ...(sanitizedStatus ? { status: sanitizedStatus } : {}),
       ...(args.supplierId ? { supplierId: args.supplierId } : {}),
       ...(args.search
         ? {
-            OR: [
-              { purchaseNumber: { contains: args.search } },
-              { invoiceNumber: { contains: args.search } },
-              { supplierReference: { contains: args.search } },
-              { supplier: { name: { contains: args.search } } }
-            ]
-          }
+          OR: [
+            { purchaseNumber: { contains: args.search } },
+            { invoiceNumber: { contains: args.search } },
+            { supplierReference: { contains: args.search } },
+            { supplier: { name: { contains: args.search } } }
+          ]
+        }
         : {})
     };
 
@@ -133,13 +143,13 @@ export class PurchaseRepository {
           expectedDeliveryDate: input.expectedDeliveryDate ? new Date(input.expectedDeliveryDate) : undefined,
           items: input.items
             ? {
-                create: input.items.map((item) => ({
-                  productId: item.productId,
-                  quantity: item.quantity,
-                  price: item.price,
-                  total: item.quantity * item.price
-                }))
-              }
+              create: input.items.map((item) => ({
+                productId: item.productId,
+                quantity: item.quantity,
+                price: item.price,
+                total: item.quantity * item.price
+              }))
+            }
             : undefined
         },
         ...purchaseWithRelationsArgs
