@@ -68,6 +68,7 @@ model Business {
   inventoryTransactions InventoryTransaction[]
   payments              Payment[]
   settings              Setting[]
+  businessModules       BusinessModule[]
 
   @@map("businesses")
 }
@@ -304,4 +305,33 @@ model Setting {
 
   @@index([businessId])
   @@map("settings")
+}
+
+model Module {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique @db.VarChar(255)
+  description String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  businessModules BusinessModule[]
+
+  @@map("modules")
+}
+
+model BusinessModule {
+  id         Int       @id @default(autoincrement())
+  businessId Int       @map("business_id")
+  moduleId   Int       @map("module_id")
+  enabled    Boolean   @default(true)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  module   Module   @relation(fields: [moduleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([businessId, moduleId])
+  @@index([businessId])
+  @@index([moduleId])
+  @@map("business_modules")
 }

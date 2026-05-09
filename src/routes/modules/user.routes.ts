@@ -4,7 +4,7 @@ import { sendSuccess } from "../../common/response/apiResponse";
 
 const router = Router();
 
-router.get("/me", authenticate, (req, res) => {
+router.get("/profile", authenticate, (req, res) => {
   return sendSuccess(res, "Authenticated user fetched", req.user);
 });
 

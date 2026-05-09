@@ -32,9 +32,15 @@ export class SaleService {
     }
   }
 
-  async list(businessId: number, query: { page?: number; limit?: number }) {
+  async list(businessId: number, query: { page?: number; limit?: number; search?: string }) {
     const pagination = getPagination(query);
-    const { items, total } = await this.saleRepository.findMany(businessId, pagination.skip, pagination.take);
+    const search = query.search?.trim();
+    const { items, total } = await this.saleRepository.findMany(
+      businessId,
+      pagination.skip,
+      pagination.take,
+      search
+    );
     return { items: items.map(saleResource), meta: buildPaginationMeta(total, pagination.page, pagination.limit) };
   }
 }

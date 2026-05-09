@@ -70,8 +70,20 @@ export class SaleRepository {
     });
   }
 
-  async findMany(businessId: number, skip: number, take: number) {
-    const where: Prisma.SaleWhereInput = { businessId };
+  async findMany(businessId: number, skip: number, take: number, search?: string) {
+    const trimmedSearch = search?.trim();
+    const where: Prisma.SaleWhereInput = {
+      businessId,
+      ...(trimmedSearch
+        ? {
+            OR: [
+              { invoiceNumber: { contains: trimmedSearch } },
+              { customer: { name: { contains: trimmedSearch } } }
+            ]
+          }
+        : {})
+    };
+
     const [items, total] = await this.db.$transaction([
       this.db.sale.findMany({
         where,

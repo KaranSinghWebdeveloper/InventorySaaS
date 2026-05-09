@@ -3,7 +3,7 @@ import { sendSuccess } from "../common/response/apiResponse";
 import { SaleService } from "../services/sale.service";
 
 export class SaleController {
-  constructor(private readonly saleService = new SaleService()) {}
+  constructor(private readonly saleService = new SaleService()) { }
 
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
