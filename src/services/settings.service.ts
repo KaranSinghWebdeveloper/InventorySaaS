@@ -18,6 +18,11 @@ export class SettingsService {
             throw new NotFoundError("Business not found");
         }
 
+        // Update business profile if provided
+        if (input.business) {
+            await this.settingsRepository.updateBusiness(businessId, input.business);
+        }
+
         // Update settings if provided
         if (input.settings) {
             await this.settingsRepository.updateSettings(businessId, input.settings);

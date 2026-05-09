@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { prisma } from "../database/prisma";
+import { UpdateSettingsInput } from "../requests/settings.request";
 
 export class SettingsRepository {
     constructor(private readonly db: PrismaClient = prisma) { }
@@ -26,15 +27,32 @@ export class SettingsRepository {
     }
 
     async updateSettings(businessId: number, settings: Record<string, string>) {
-        const updates = Object.entries(settings).map(([key, value]) =>
-            this.db.setting.upsert({
-                where: { businessId_key: { businessId, key } },
-                update: { value },
-                create: { businessId, key, value }
-            })
-        );
+        await this.db.$transaction(async (tx) => {
+            for (const [key, value] of Object.entries(settings)) {
+                const existingSetting = await tx.setting.findFirst({
+                    where: { businessId, key }
+                });
 
-        await this.db.$transaction(updates);
+                if (existingSetting) {
+                    await tx.setting.update({
+                        where: { id: existingSetting.id },
+                        data: { value }
+                    });
+                    continue;
+                }
+
+                await tx.setting.create({
+                    data: { businessId, key, value }
+                });
+            }
+        });
+    }
+
+    async updateBusiness(businessId: number, business: NonNullable<UpdateSettingsInput["business"]>) {
+        await this.db.business.update({
+            where: { id: businessId },
+            data: business
+        });
     }
 
     async updateBusinessModules(businessId: number, modules: Record<number, boolean>) {
