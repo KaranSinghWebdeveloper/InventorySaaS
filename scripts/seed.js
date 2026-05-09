@@ -19,7 +19,21 @@ async function main() {
     prisma.user.deleteMany(),
     prisma.setting.deleteMany(),
     prisma.payment.deleteMany(),
-    prisma.business.deleteMany()
+    prisma.businessModule.deleteMany(),
+    prisma.business.deleteMany(),
+    prisma.module.deleteMany()
+  ]);
+
+  // Create modules
+  const modules = await Promise.all([
+    prisma.module.create({ data: { name: "products", description: "Product management" } }),
+    prisma.module.create({ data: { name: "categories", description: "Category management" } }),
+    prisma.module.create({ data: { name: "inventory", description: "Inventory tracking" } }),
+    prisma.module.create({ data: { name: "customers", description: "Customer management" } }),
+    prisma.module.create({ data: { name: "suppliers", description: "Supplier management" } }),
+    prisma.module.create({ data: { name: "sales", description: "Sales management" } }),
+    prisma.module.create({ data: { name: "purchases", description: "Purchase management" } }),
+    prisma.module.create({ data: { name: "users", description: "User management" } })
   ]);
 
   const business = await prisma.business.create({
@@ -29,6 +43,15 @@ async function main() {
       phone: "+91-9999999999",
       address: "Bengaluru, India"
     }
+  });
+
+  // Enable all modules for the business
+  await prisma.businessModule.createMany({
+    data: modules.map(module => ({
+      businessId: business.id,
+      moduleId: module.id,
+      enabled: true
+    }))
   });
 
   const adminUser = await prisma.user.create({

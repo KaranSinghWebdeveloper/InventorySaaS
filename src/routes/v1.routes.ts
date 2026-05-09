@@ -8,6 +8,7 @@ import { purchaseRoutes } from "./modules/purchase.routes";
 import { saleRoutes } from "./modules/sale.routes";
 import { supplierRoutes } from "./modules/supplier.routes";
 import { userRoutes } from "./modules/user.routes";
+import { settingsRoutes } from "./modules/settings.routes";
 
 export const v1Routes = Router();
 
@@ -38,3 +39,4 @@ v1Routes.use("/customers", customerRoutes);
 v1Routes.use("/suppliers", supplierRoutes);
 v1Routes.use("/sales", saleRoutes);
 v1Routes.use("/purchases", purchaseRoutes);
+v1Routes.use("/settings", settingsRoutes);
