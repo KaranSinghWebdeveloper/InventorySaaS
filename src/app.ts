@@ -15,7 +15,11 @@ import { v1Routes } from "./routes/v1.routes";
 export const app = express();
 
 app.disable("x-powered-by");
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  })
+);
 app.use(
   cors({
     origin: env.CORS_ORIGIN === "*" ? true : env.CORS_ORIGIN.split(","),
