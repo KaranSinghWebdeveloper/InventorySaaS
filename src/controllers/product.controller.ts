@@ -3,7 +3,7 @@ import { sendSuccess } from "../common/response/apiResponse";
 import { ProductService } from "../services/product.service";
 
 export class ProductController {
-  constructor(private readonly productService = new ProductService()) {}
+  constructor(private readonly productService = new ProductService()) { }
 
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {

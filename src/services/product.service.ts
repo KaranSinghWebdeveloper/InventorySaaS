@@ -5,7 +5,7 @@ import { CreateProductInput, UpdateProductInput } from "../requests/product.requ
 import { productResource } from "../resources/product.resource";
 
 export class ProductService {
-  constructor(private readonly productRepository = new ProductRepository()) {}
+  constructor(private readonly productRepository = new ProductRepository()) { }
 
   async create(businessId: number, input: CreateProductInput) {
     const product = await this.productRepository.create(businessId, {
@@ -15,10 +15,10 @@ export class ProductService {
       name: input.name,
       price: input.price,
       costPrice: input.costPrice ?? null,
-      quantity: 0,
       lowStockAlert: input.lowStockAlert,
       unit: input.unit ?? null,
-      status: input.status ?? 1
+      status: input.status ?? 1,
+      quantity: input.quantity ?? 0
     });
 
     return productResource(product);
@@ -63,7 +63,8 @@ export class ProductService {
       costPrice: input.costPrice,
       lowStockAlert: input.lowStockAlert,
       unit: input.unit,
-      status: input.status
+      status: input.status,
+      quantity: input.quantity
     });
     return productResource(product);
   }

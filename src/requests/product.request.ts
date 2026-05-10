@@ -9,7 +9,8 @@ const productBody = z.object({
   costPrice: z.coerce.number().nonnegative().optional(),
   lowStockAlert: z.coerce.number().int().min(0).default(0),
   unit: z.string().trim().max(50).optional(),
-  status: z.coerce.number().int().min(0).max(1).optional()
+  status: z.coerce.number().int().min(0).max(1).optional(),
+  quantity: z.coerce.number().int().min(0).optional()
 });
 
 export const createProductSchema = z.object({ body: productBody });
