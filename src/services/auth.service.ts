@@ -8,7 +8,7 @@ import { LoginInput, RegisterInput } from "../requests/auth.request";
 import { businessResource, userResource } from "../resources/auth.resource";
 
 export class AuthService {
-  constructor(private readonly authRepository = new AuthRepository()) {}
+  constructor(private readonly authRepository = new AuthRepository()) { }
 
   async register(input: RegisterInput) {
     const existingUser = await this.authRepository.findUserByEmail(input.email);
@@ -20,7 +20,7 @@ export class AuthService {
     const password = await bcrypt.hash(input.password, env.BCRYPT_SALT_ROUNDS);
 
     const { business, user } = await this.authRepository.createBusinessWithAdmin({
-      businessName: input.businessName,
+      // businessName: input.businessName ?? "Default Business",
       name: input.name,
       email: input.email,
       password

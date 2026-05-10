@@ -3,7 +3,7 @@ import { sendSuccess } from "../common/response/apiResponse";
 import { AuthService } from "../services/auth.service";
 
 export class AuthController {
-  constructor(private readonly authService = new AuthService()) {}
+  constructor(private readonly authService = new AuthService()) { }
 
   register = async (req: Request, res: Response, next: NextFunction) => {
     try {
