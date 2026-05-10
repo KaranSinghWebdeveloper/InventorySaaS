@@ -1,11 +1,15 @@
 import { Router } from "express";
 import { authenticate } from "../../common/middleware/auth.middleware";
-import { sendSuccess } from "../../common/response/apiResponse";
+import { parseProfileMultipart } from "../../common/middleware/profileMultipart";
+import { validateRequest } from "../../common/middleware/validateRequest";
+import { UserController } from "../../controllers/user.controller";
+import { updateProfileSchema } from "../../requests/user.request";
 
 const router = Router();
+const controller = new UserController();
 
-router.get("/profile", authenticate, (req, res) => {
-  return sendSuccess(res, "Authenticated user fetched", req.user);
-});
+router.use(authenticate);
+router.get("/profile", controller.profile);
+router.patch("/profile", parseProfileMultipart, validateRequest(updateProfileSchema), controller.updateProfile);
 
 export const userRoutes = router;

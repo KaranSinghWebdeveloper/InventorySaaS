@@ -74,14 +74,16 @@ model Business {
 }
 
 model User {
-  id         Int       @id @default(autoincrement())
-  businessId Int       @map("business_id")
-  name       String    @db.VarChar(255)
-  email      String    @unique @db.VarChar(255)
-  password   String    @db.VarChar(255)
-  role       UserRole  @default(STAFF)
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
+  id           Int       @id @default(autoincrement())
+  businessId   Int       @map("business_id")
+  name         String    @db.VarChar(255)
+  email        String    @unique @db.VarChar(255)
+  phone        String?   @db.VarChar(50)
+  password     String    @db.VarChar(255)
+  profileImage String?   @map("profile_image") @db.VarChar(255)
+  role         UserRole  @default(STAFF)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 

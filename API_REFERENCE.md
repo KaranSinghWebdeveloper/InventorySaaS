@@ -100,6 +100,7 @@ Response:
       "businessId": 2,
       "name": "Admin User",
       "email": "admin@example.com",
+      "profileImage": null,
       "role": "ADMIN",
       "createdAt": "2026-04-25T08:10:00.000Z"
     },
@@ -135,6 +136,7 @@ Response:
       "businessId": 1,
       "name": "System Admin",
       "email": "admin@inventory.local",
+      "profileImage": null,
       "role": "ADMIN",
       "createdAt": "2026-04-25T08:05:02.000Z"
     },
@@ -175,7 +177,7 @@ Response:
 
 ## Users
 
-### `GET /users/me`
+### `GET /users/profile`
 
 Response:
 
@@ -186,7 +188,46 @@ Response:
   "data": {
     "id": 1,
     "businessId": 1,
-    "role": "ADMIN"
+    "name": "System Admin",
+    "email": "admin@inventory.local",
+    "profileImage": "https://example.com/profile.jpg",
+    "role": "ADMIN",
+    "createdAt": "2026-04-25T08:05:02.000Z",
+    "updatedAt": "2026-04-25T08:05:02.000Z"
+  },
+  "errors": null
+}
+```
+
+### `PATCH /users/profile`
+
+Request:
+
+```json
+{
+  "name": "Updated Admin",
+  "email": "updated-admin@example.com",
+  "profileImage": "https://example.com/profile.jpg"
+}
+```
+
+`profile_image` is also accepted as an alias for `profileImage`.
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Profile updated",
+  "data": {
+    "id": 1,
+    "businessId": 1,
+    "name": "Updated Admin",
+    "email": "updated-admin@example.com",
+    "profileImage": "https://example.com/profile.jpg",
+    "role": "ADMIN",
+    "createdAt": "2026-04-25T08:05:02.000Z",
+    "updatedAt": "2026-05-10T07:30:00.000Z"
   },
   "errors": null
 }
