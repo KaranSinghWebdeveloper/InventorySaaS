@@ -6,7 +6,7 @@ import { inventoryTransactionResource } from "../resources/inventory.resource";
 import { CreateInventoryTransactionInput } from "../requests/inventory.request";
 
 export class InventoryService {
-  constructor(private readonly inventoryRepository = new InventoryRepository()) {}
+  constructor(private readonly inventoryRepository = new InventoryRepository()) { }
 
   async createTransaction(businessId: number, input: CreateInventoryTransactionInput) {
     const product = await this.inventoryRepository.findProduct(businessId, input.productId);
@@ -24,8 +24,8 @@ export class InventoryService {
       businessId,
       productId: input.productId,
       type: input.type,
-      referenceType: input.referenceType,
-      referenceId: input.referenceId,
+      referenceType: input.referenceType ?? 'PURCHASE',
+      referenceId: input.referenceId ?? 0,
       quantity: input.quantity,
       quantityDelta
     });

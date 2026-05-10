@@ -5,16 +5,16 @@ export const inventoryTransactionResource = (transaction: InventoryTransactionWi
   businessId: transaction.businessId,
   productId: transaction.productId,
   type: transaction.type,
-  referenceType: transaction.referenceType,
+  referenceType: transaction.referenceType ?? null,
   referenceId: transaction.referenceId,
   quantity: transaction.quantity,
   product: transaction.product
     ? {
-        id: transaction.product.id,
-        name: transaction.product.name,
-        sku: transaction.product.sku,
-        quantity: transaction.product.quantity
-      }
+      id: transaction.product.id,
+      name: transaction.product.name,
+      sku: transaction.product.sku,
+      quantity: transaction.product.quantity
+    }
     : null,
   createdAt: transaction.createdAt
 });

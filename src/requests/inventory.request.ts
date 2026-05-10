@@ -5,7 +5,7 @@ export const createInventoryTransactionSchema = z.object({
   body: z.object({
     productId: z.coerce.number().int().positive(),
     type: z.nativeEnum(InventoryTransactionType),
-    referenceType: z.nativeEnum(InventoryReferenceType),
+    referenceType: z.nativeEnum(InventoryReferenceType).optional(),
     referenceId: z.coerce.number().int().positive().optional(),
     quantity: z.coerce.number().int().positive()
   })

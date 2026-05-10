@@ -8,7 +8,7 @@ import { prisma } from "../database/prisma";
 import { inventoryTransactionWithProductArgs } from "../models/inventory-transaction.model";
 
 export class InventoryRepository {
-  constructor(private readonly db: PrismaClient = prisma) {}
+  constructor(private readonly db: PrismaClient = prisma) { }
 
   async createTransaction(input: {
     businessId: number;
@@ -30,8 +30,8 @@ export class InventoryRepository {
           businessId: input.businessId,
           productId: input.productId,
           type: input.type,
-          referenceType: input.referenceType,
-          referenceId: input.referenceId ?? null,
+          referenceType: input.referenceType ?? null,
+          referenceId: input.referenceId ?? 0,
           quantity: input.quantity
         },
         ...inventoryTransactionWithProductArgs
