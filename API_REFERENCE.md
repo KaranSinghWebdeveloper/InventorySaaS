@@ -64,6 +64,67 @@ Response:
 }
 ```
 
+## Dashboard
+
+### `GET /dashboard`
+
+Returns the complete dashboard payload for the authenticated user's business.
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Dashboard overview fetched",
+  "data": {
+    "stats": {
+      "totalRevenue": {
+        "title": "Total Revenue",
+        "value": 67890,
+        "format": "currency",
+        "trend": { "value": 12.5, "isPositive": true }
+      },
+      "totalProducts": {
+        "title": "Total Products",
+        "value": 1234,
+        "format": "number",
+        "trend": { "value": 8.2, "isPositive": true }
+      },
+      "lowStockItems": {
+        "title": "Low Stock Items",
+        "value": 23,
+        "format": "number",
+        "trend": { "value": 3.1, "isPositive": false }
+      },
+      "salesThisMonth": {
+        "title": "Sales This Month",
+        "value": 45230,
+        "format": "currency",
+        "trend": { "value": 15.3, "isPositive": true }
+      }
+    },
+    "salesPurchasesTrend": [
+      { "month": "Jan", "sales": 45000, "purchases": 32000 }
+    ],
+    "categoryDistribution": [
+      { "name": "Electronics", "value": 35000, "percent": 35, "color": "#6366f1" }
+    ],
+    "recentActivity": [
+      {
+        "id": "sale-1",
+        "type": "sale",
+        "title": "Sale to John Doe",
+        "amount": 350,
+        "quantity": null,
+        "status": "paid",
+        "createdAt": "2026-05-16T10:30:00.000Z"
+      }
+    ]
+  },
+  "errors": null
+}
+```
+
 ## Auth
 
 ### `POST /auth/register`

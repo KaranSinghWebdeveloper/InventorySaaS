@@ -4,6 +4,7 @@ import { categoryRoutes } from "./modules/category.routes";
 import { inventoryRoutes } from "./modules/inventory.routes";
 import { productRoutes } from "./modules/product.routes";
 import { customerRoutes } from "./modules/customer.routes";
+import { dashboardRoutes } from "./modules/dashboard.routes";
 import { purchaseRoutes } from "./modules/purchase.routes";
 import { saleRoutes } from "./modules/sale.routes";
 import { supplierRoutes } from "./modules/supplier.routes";
@@ -31,6 +32,7 @@ v1Routes.get("/health", (_req, res) => {
 });
 
 v1Routes.use("/auth", authRoutes);
+v1Routes.use("/dashboard", dashboardRoutes);
 v1Routes.use("/users", userRoutes);
 v1Routes.use("/products", productRoutes);
 v1Routes.use("/categories", categoryRoutes);
