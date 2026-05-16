@@ -34,6 +34,7 @@ enum InventoryTransactionType {
 enum InventoryReferenceType {
   PURCHASE @map("purchase")
   SALE     @map("sale")
+  POS_SALE @map("pos_sale")
   MANUAL   @map("manual")
 }
 
@@ -46,6 +47,13 @@ enum PaymentMethod {
   CASH @map("cash")
   UPI  @map("upi")
   CARD @map("card")
+}
+
+enum PosPaymentMethod {
+  CASH   @map("cash")
+  UPI    @map("upi")
+  CARD   @map("card")
+  CREDIT @map("credit")
 }
 
 model Business {
@@ -65,6 +73,8 @@ model Business {
   customers             Customer[]
   purchases             Purchase[]
   sales                 Sale[]
+  posSales              PosSale[]
+  posSaleItems          PosSaleItem[]
   inventoryTransactions InventoryTransaction[]
   payments              Payment[]
   settings              Setting[]
@@ -86,6 +96,7 @@ model User {
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  posSales PosSale[]
 
   @@index([businessId])
   @@map("users")
@@ -131,6 +142,7 @@ model Product {
   category              Category?              @relation(fields: [categoryId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   purchaseItems         PurchaseItem[]
   saleItems             SaleItem[]
+  posSaleItems          PosSaleItem[]
   inventoryTransactions InventoryTransaction[]
 
   @@index([businessId])
@@ -258,6 +270,59 @@ model SaleItem {
   @@index([saleId])
   @@index([productId])
   @@map("sale_items")
+}
+
+model PosSale {
+  id             Int              @id @default(autoincrement())
+  businessId     Int              @map("business_id")
+  invoiceNo      String           @map("invoice_no") @db.VarChar(50)
+  customerName   String?          @map("customer_name") @db.VarChar(255)
+  customerPhone  String?          @map("customer_phone") @db.VarChar(20)
+  subtotal       Decimal          @default(0) @db.Decimal(15, 2)
+  discountAmount Decimal          @default(0) @map("discount_amount") @db.Decimal(15, 2)
+  taxAmount      Decimal          @default(0) @map("tax_amount") @db.Decimal(15, 2)
+  totalAmount    Decimal          @default(0) @map("total_amount") @db.Decimal(15, 2)
+  paymentMethod  PosPaymentMethod @default(CASH) @map("payment_method")
+  paidAmount     Decimal          @default(0) @map("paid_amount") @db.Decimal(15, 2)
+  createdBy      Int              @map("created_by")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  business Business      @relation(fields: [businessId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  creator  User          @relation(fields: [createdBy], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  items    PosSaleItem[]
+
+  @@index([businessId], map: "idx_pos_sales_business")
+  @@index([invoiceNo], map: "idx_pos_sales_invoice")
+  @@index([createdAt], map: "idx_pos_sales_created_at")
+  @@index([businessId, createdAt], map: "idx_pos_sales_business_date")
+  @@unique([businessId, invoiceNo], map: "pos_sales_business_invoice_unique")
+  @@map("pos_sales")
+}
+
+model PosSaleItem {
+  id             Int       @id @default(autoincrement())
+  saleId         Int       @map("sale_id")
+  businessId     Int       @map("business_id")
+  productId      Int       @map("product_id")
+  batchNo        String?   @map("batch_no") @db.VarChar(100)
+  expiryDate     DateTime? @map("expiry_date") @db.Date
+  quantity       Decimal   @db.Decimal(15, 2)
+  unitPrice      Decimal   @map("unit_price") @db.Decimal(15, 2)
+  discountAmount Decimal   @default(0) @map("discount_amount") @db.Decimal(15, 2)
+  taxAmount      Decimal   @default(0) @map("tax_amount") @db.Decimal(15, 2)
+  totalAmount    Decimal   @map("total_amount") @db.Decimal(15, 2)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  sale     PosSale @relation(fields: [saleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  business Business @relation(fields: [businessId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([saleId], map: "idx_pos_sale_items_sale")
+  @@index([productId], map: "idx_pos_sale_items_product")
+  @@index([businessId], map: "idx_pos_sale_items_business")
+  @@map("pos_sale_items")
 }
 
 model InventoryTransaction {

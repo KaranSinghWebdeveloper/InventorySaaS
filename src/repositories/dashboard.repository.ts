@@ -2,16 +2,27 @@ import {
   InventoryReferenceType,
   Prisma,
   PrismaClient,
+  PosSale,
   Purchase,
   Sale
 } from "@prisma/client";
 import { prisma } from "../database/prisma";
 
 export type DashboardSaleTrendRow = Pick<Sale, "totalAmount" | "saleDate" | "createdAt">;
+export type DashboardPosSaleTrendRow = Pick<PosSale, "totalAmount" | "createdAt">;
 export type DashboardPurchaseTrendRow = Pick<Purchase, "totalAmount" | "purchaseDate" | "createdAt">;
 
 export type DashboardCategorySaleRow = {
   total: Prisma.Decimal | null;
+  product: {
+    category: {
+      name: string;
+    } | null;
+  };
+};
+
+export type DashboardCategoryPosSaleRow = {
+  totalAmount: Prisma.Decimal;
   product: {
     category: {
       name: string;
@@ -30,6 +41,8 @@ export type DashboardRecentPurchase = Pick<Purchase, "id" | "purchaseNumber" | "
     name: string;
   } | null;
 };
+
+export type DashboardRecentPosSale = Pick<PosSale, "id" | "invoiceNo" | "customerName" | "totalAmount" | "paymentMethod" | "createdAt">;
 
 export type DashboardRecentInventoryTransaction = {
   id: number;
@@ -60,6 +73,9 @@ export class DashboardRepository {
       totalRevenue,
       currentMonthRevenue,
       previousMonthRevenue,
+      totalPosRevenue,
+      currentMonthPosRevenue,
+      previousMonthPosRevenue,
       totalProducts,
       currentMonthProducts,
       previousMonthProducts,
@@ -77,6 +93,24 @@ export class DashboardRepository {
         _sum: { totalAmount: true }
       }),
       this.db.sale.aggregate({
+        where: {
+          businessId: args.businessId,
+          createdAt: { gte: args.previousMonthStart, lt: args.currentMonthStart }
+        },
+        _sum: { totalAmount: true }
+      }),
+      this.db.posSale.aggregate({
+        where: { businessId: args.businessId },
+        _sum: { totalAmount: true }
+      }),
+      this.db.posSale.aggregate({
+        where: {
+          businessId: args.businessId,
+          createdAt: { gte: args.currentMonthStart, lt: args.nextMonthStart }
+        },
+        _sum: { totalAmount: true }
+      }),
+      this.db.posSale.aggregate({
         where: {
           businessId: args.businessId,
           createdAt: { gte: args.previousMonthStart, lt: args.currentMonthStart }
@@ -103,6 +137,9 @@ export class DashboardRepository {
       totalRevenue: totalRevenue._sum.totalAmount,
       currentMonthRevenue: currentMonthRevenue._sum.totalAmount,
       previousMonthRevenue: previousMonthRevenue._sum.totalAmount,
+      totalPosRevenue: totalPosRevenue._sum.totalAmount,
+      currentMonthPosRevenue: currentMonthPosRevenue._sum.totalAmount,
+      previousMonthPosRevenue: previousMonthPosRevenue._sum.totalAmount,
       totalProducts,
       currentMonthProducts,
       previousMonthProducts,
@@ -111,13 +148,20 @@ export class DashboardRepository {
   }
 
   async getTrendRows(businessId: number, from: Date) {
-    const [sales, purchases] = await this.db.$transaction([
+    const [sales, posSales, purchases] = await this.db.$transaction([
       this.db.sale.findMany({
         where: {
           businessId,
           OR: [{ saleDate: { gte: from } }, { saleDate: null, createdAt: { gte: from } }]
         },
         select: { totalAmount: true, saleDate: true, createdAt: true }
+      }),
+      this.db.posSale.findMany({
+        where: {
+          businessId,
+          createdAt: { gte: from }
+        },
+        select: { totalAmount: true, createdAt: true }
       }),
       this.db.purchase.findMany({
         where: {
@@ -128,32 +172,52 @@ export class DashboardRepository {
       })
     ]);
 
-    return { sales, purchases };
+    return { sales, posSales, purchases };
   }
 
   getCategorySales(businessId: number, from: Date) {
-    return this.db.saleItem.findMany({
-      where: {
-        sale: {
-          businessId,
-          OR: [{ saleDate: { gte: from } }, { saleDate: null, createdAt: { gte: from } }]
-        }
-      },
-      select: {
-        total: true,
-        product: {
-          select: {
-            category: {
-              select: { name: true }
+    return this.db.$transaction([
+      this.db.saleItem.findMany({
+        where: {
+          sale: {
+            businessId,
+            OR: [{ saleDate: { gte: from } }, { saleDate: null, createdAt: { gte: from } }]
+          }
+        },
+        select: {
+          total: true,
+          product: {
+            select: {
+              category: {
+                select: { name: true }
+              }
             }
           }
         }
-      }
-    });
+      }),
+      this.db.posSaleItem.findMany({
+        where: {
+          sale: {
+            businessId,
+            createdAt: { gte: from }
+          }
+        },
+        select: {
+          totalAmount: true,
+          product: {
+            select: {
+              category: {
+                select: { name: true }
+              }
+            }
+          }
+        }
+      })
+    ]);
   }
 
   async getRecentActivity(businessId: number, limit: number) {
-    const [sales, purchases, stockTransactions] = await this.db.$transaction([
+    const [sales, posSales, purchases, stockTransactions] = await this.db.$transaction([
       this.db.sale.findMany({
         where: { businessId },
         select: {
@@ -162,6 +226,19 @@ export class DashboardRepository {
           status: true,
           createdAt: true,
           customer: { select: { name: true } }
+        },
+        orderBy: { createdAt: "desc" },
+        take: limit
+      }),
+      this.db.posSale.findMany({
+        where: { businessId },
+        select: {
+          id: true,
+          invoiceNo: true,
+          customerName: true,
+          totalAmount: true,
+          paymentMethod: true,
+          createdAt: true
         },
         orderBy: { createdAt: "desc" },
         take: limit
@@ -196,6 +273,6 @@ export class DashboardRepository {
       })
     ]);
 
-    return { sales, purchases, stockTransactions };
+    return { sales, posSales, purchases, stockTransactions };
   }
 }

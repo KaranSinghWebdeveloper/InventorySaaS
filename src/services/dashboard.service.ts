@@ -1,8 +1,11 @@
 import { Prisma } from "@prisma/client";
 import {
+  DashboardCategoryPosSaleRow,
   DashboardCategorySaleRow,
+  DashboardPosSaleTrendRow,
   DashboardPurchaseTrendRow,
   DashboardRecentInventoryTransaction,
+  DashboardRecentPosSale,
   DashboardRecentPurchase,
   DashboardRecentSale,
   DashboardRepository,
@@ -39,14 +42,19 @@ export class DashboardService {
       this.dashboardRepository.getCategorySales(businessId, trendStart),
       this.dashboardRepository.getRecentActivity(businessId, 5)
     ]);
+    const totalRevenue = this.toNumber(stats.totalRevenue) + this.toNumber(stats.totalPosRevenue);
+    const currentMonthRevenue =
+      this.toNumber(stats.currentMonthRevenue) + this.toNumber(stats.currentMonthPosRevenue);
+    const previousMonthRevenue =
+      this.toNumber(stats.previousMonthRevenue) + this.toNumber(stats.previousMonthPosRevenue);
 
     const dashboard: DashboardResource = {
       stats: {
         totalRevenue: {
           title: "Total Revenue",
-          value: this.toNumber(stats.totalRevenue),
+          value: this.round(totalRevenue),
           format: "currency",
-          trend: this.buildTrend(stats.currentMonthRevenue, stats.previousMonthRevenue)
+          trend: this.buildTrend(currentMonthRevenue, previousMonthRevenue)
         },
         totalProducts: {
           title: "Total Products",
@@ -65,12 +73,17 @@ export class DashboardService {
         },
         salesThisMonth: {
           title: "Sales This Month",
-          value: this.toNumber(stats.currentMonthRevenue),
+          value: this.round(currentMonthRevenue),
           format: "currency",
-          trend: this.buildTrend(stats.currentMonthRevenue, stats.previousMonthRevenue)
+          trend: this.buildTrend(currentMonthRevenue, previousMonthRevenue)
         }
       },
-      salesPurchasesTrend: this.buildTrendPoints(trendRows.sales, trendRows.purchases, trendStart),
+      salesPurchasesTrend: this.buildTrendPoints(
+        trendRows.sales,
+        trendRows.posSales,
+        trendRows.purchases,
+        trendStart
+      ),
       categoryDistribution: this.buildCategoryDistribution(categorySales),
       recentActivity: this.buildRecentActivity(recentActivity)
     };
@@ -80,6 +93,7 @@ export class DashboardService {
 
   private buildTrendPoints(
     sales: DashboardSaleTrendRow[],
+    posSales: DashboardPosSaleTrendRow[],
     purchases: DashboardPurchaseTrendRow[],
     trendStart: Date
   ): DashboardTrendPoint[] {
@@ -104,6 +118,13 @@ export class DashboardService {
       }
     }
 
+    for (const sale of posSales) {
+      const point = pointByKey.get(this.getMonthKey(sale.createdAt));
+      if (point) {
+        point.sales += this.toNumber(sale.totalAmount);
+      }
+    }
+
     for (const purchase of purchases) {
       const date = purchase.purchaseDate ?? purchase.createdAt;
       const point = pointByKey.get(this.getMonthKey(date));
@@ -119,12 +140,19 @@ export class DashboardService {
     }));
   }
 
-  private buildCategoryDistribution(rows: DashboardCategorySaleRow[]): DashboardCategoryPoint[] {
+  private buildCategoryDistribution(
+    rows: [DashboardCategorySaleRow[], DashboardCategoryPosSaleRow[]]
+  ): DashboardCategoryPoint[] {
     const totals = new Map<string, number>();
 
-    for (const row of rows) {
+    for (const row of rows[0]) {
       const categoryName = row.product.category?.name ?? "Uncategorized";
       totals.set(categoryName, (totals.get(categoryName) ?? 0) + this.toNumber(row.total));
+    }
+
+    for (const row of rows[1]) {
+      const categoryName = row.product.category?.name ?? "Uncategorized";
+      totals.set(categoryName, (totals.get(categoryName) ?? 0) + this.toNumber(row.totalAmount));
     }
 
     const grandTotal = Array.from(totals.values()).reduce((sum, value) => sum + value, 0);
@@ -141,6 +169,7 @@ export class DashboardService {
 
   private buildRecentActivity(activity: {
     sales: DashboardRecentSale[];
+    posSales: DashboardRecentPosSale[];
     purchases: DashboardRecentPurchase[];
     stockTransactions: DashboardRecentInventoryTransaction[];
   }): DashboardActivity[] {
@@ -151,6 +180,16 @@ export class DashboardService {
       amount: this.toNumber(sale.totalAmount),
       quantity: null,
       status: sale.status.toLowerCase(),
+      createdAt: sale.createdAt
+    }));
+
+    const posSales = activity.posSales.map((sale): DashboardActivity => ({
+      id: `pos-sale-${sale.id}`,
+      type: "sale",
+      title: `POS sale ${sale.customerName ? `to ${sale.customerName}` : sale.invoiceNo}`,
+      amount: this.toNumber(sale.totalAmount),
+      quantity: null,
+      status: sale.paymentMethod.toLowerCase(),
       createdAt: sale.createdAt
     }));
 
@@ -174,7 +213,7 @@ export class DashboardService {
       createdAt: transaction.createdAt
     }));
 
-    return [...sales, ...purchases, ...stockTransactions]
+    return [...sales, ...posSales, ...purchases, ...stockTransactions]
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
       .slice(0, 5);
   }

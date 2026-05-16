@@ -68,7 +68,7 @@ Response:
 
 ### `GET /dashboard`
 
-Returns the complete dashboard payload for the authenticated user's business.
+Returns the complete dashboard payload for the authenticated user's business. Revenue, monthly sales, category distribution, and recent activity include both regular sales and POS sales.
 
 Response:
 
@@ -124,6 +124,129 @@ Response:
   "errors": null
 }
 ```
+
+## POS Sales
+
+POS sale create/update APIs compute `subtotal`, `discountAmount`, `taxAmount`, and `totalAmount` on the server. Creating a POS sale reduces product stock. Updating a POS sale reverses the old stock movement and applies the new one. Deleting a POS sale restores stock.
+
+### `GET /pos-sales?page=1&limit=20&search=INV&paymentMethod=CASH&dateFrom=2026-05-01&dateTo=2026-05-16`
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "POS sales fetched",
+  "data": {
+    "items": [
+      {
+        "id": 1,
+        "businessId": 1,
+        "invoiceNo": "POS-1778910000000",
+        "customerName": "John Doe",
+        "customerPhone": "9876543210",
+        "subtotal": 1200,
+        "discountAmount": 50,
+        "taxAmount": 18,
+        "totalAmount": 1168,
+        "paymentMethod": "CASH",
+        "paidAmount": 1168,
+        "createdBy": 1,
+        "creator": { "id": 1, "name": "Admin User" },
+        "items": [
+          {
+            "id": 1,
+            "productId": 3,
+            "productName": "Wireless Headphones",
+            "batchNo": "BATCH-01",
+            "expiryDate": null,
+            "quantity": 2,
+            "unitPrice": 600,
+            "discountAmount": 50,
+            "taxAmount": 18,
+            "totalAmount": 1168,
+            "updatedAt": "2026-05-16T10:30:00.000Z"
+          }
+        ],
+        "createdAt": "2026-05-16T10:30:00.000Z",
+        "updatedAt": "2026-05-16T10:30:00.000Z"
+      }
+    ],
+    "meta": {
+      "total": 1,
+      "page": 1,
+      "limit": 20,
+      "totalPages": 1
+    }
+  },
+  "errors": null
+}
+```
+
+Available payment methods:
+
+```text
+CASH
+UPI
+CARD
+CREDIT
+```
+
+### `POST /pos-sales`
+
+Request:
+
+```json
+{
+  "invoiceNo": "POS-1001",
+  "customerName": "John Doe",
+  "customerPhone": "9876543210",
+  "paymentMethod": "CASH",
+  "paidAmount": 1168,
+  "items": [
+    {
+      "productId": 3,
+      "batchNo": "BATCH-01",
+      "expiryDate": null,
+      "quantity": 2,
+      "unitPrice": 600,
+      "discountAmount": 50,
+      "taxAmount": 18
+    }
+  ]
+}
+```
+
+`invoiceNo` is optional. If omitted, the API generates one.
+
+### `GET /pos-sales/:id`
+
+### `PATCH /pos-sales/:id`
+
+Use this to edit customer details, payment details, invoice number, or sale items. If `items` are provided, stock is recalculated transactionally.
+
+Request:
+
+```json
+{
+  "customerName": "Jane Smith",
+  "paymentMethod": "UPI",
+  "paidAmount": 2340,
+  "items": [
+    {
+      "productId": 3,
+      "quantity": 3,
+      "unitPrice": 800,
+      "discountAmount": 100,
+      "taxAmount": 40
+    }
+  ]
+}
+```
+
+### `DELETE /pos-sales/:id`
+
+Deletes the POS sale and restores the sold stock.
 
 ## Auth
 
