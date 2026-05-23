@@ -4,6 +4,7 @@ const productBody = z.object({
   categoryId: z.coerce.number().int().positive().nullable().optional(),
   sku: z.string().trim().min(1).max(64).optional(),
   barcode: z.string().trim().max(100).optional(),
+  image: z.string().trim().max(255).nullable().optional(),
   name: z.string().trim().min(2).max(160),
   price: z.coerce.number().nonnegative(),
   costPrice: z.coerce.number().nonnegative().optional(),
