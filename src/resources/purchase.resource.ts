@@ -17,7 +17,25 @@ export const purchaseResource = (purchase: PurchaseWithRelationsModel) => ({
   confirmedAt: purchase.confirmedAt,
   receivedAt: purchase.receivedAt,
   verifiedAt: purchase.verifiedAt,
-  supplier: purchase.supplier ? { id: purchase.supplier.id, name: purchase.supplier.name } : null,
+  business: purchase.business
+    ? {
+      id: purchase.business.id,
+      name: purchase.business.name,
+      email: purchase.business.email,
+      phone: purchase.business.phone,
+      address: purchase.business.address,
+      logo: purchase.business.logo
+    }
+    : null,
+  supplier: purchase.supplier
+    ? {
+      id: purchase.supplier.id,
+      name: purchase.supplier.name,
+      email: purchase.supplier.email,
+      phone: purchase.supplier.phone,
+      address: purchase.supplier.address
+    }
+    : null,
   items:
     purchase.items?.map((item) => ({
       id: item.id,
